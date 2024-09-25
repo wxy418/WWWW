@@ -1,0 +1,57 @@
+import pandas as pd
+import numpy as np
+from scipy.stats import entropy
+
+# 读取数据
+data1 = pd.read_excel('data1.xls')
+data2 = pd.read_excel('data2.xls')
+
+# 计算概率分布
+def probability_distribution(data):
+    value_counts = data.value_counts(normalize=True)
+    return value_counts
+
+# 计算熵 H(X)
+def entropy_calculation(data):
+    prob_dist = probability_distribution(data)
+    return -np.sum(prob_dist * np.log2(prob_dist))
+
+# 计算联合熵 H(X, Y)
+def joint_entropy(data1, data2):
+    joint_dist = pd.concat([data1, data2], axis=1).value_counts(normalize=True)
+    return -np.sum(joint_dist * np.log2(joint_dist))
+
+# 计算条件熵 H(X|Y) 和 H(Y|X)
+def conditional_entropy(data1, data2):
+    h_x = entropy_calculation(data1)
+    h_xy = joint_entropy(data1, data2)
+    h_y = entropy_calculation(data2)
+    
+    h_xy_given_y = h_xy - h_y  # H(X|Y) = H(X,Y) - H(Y)
+    h_xy_given_x = h_xy - h_x  # H(Y|X) = H(X,Y) - H(X)
+    
+    return h_xy_given_y, h_xy_given_x
+
+# 计算互信息 I(X; Y)
+def mutual_information(data1, data2):
+    h_x = entropy_calculation(data1)
+    h_y = entropy_calculation(data2)
+    h_xy = joint_entropy(data1, data2)
+    
+    return h_x + h_y - h_xy
+
+# 计算结果
+H_X = entropy_calculation(data1)
+H_Y = entropy_calculation(data2)
+H_XY = joint_entropy(data1, data2)
+H_X_given_Y, H_Y_given_X = conditional_entropy(data1, data2)
+I_XY = mutual_information(data1, data2)
+
+# 输出结果
+print(f"H(X): {H_X}")
+print(f"H(Y): {H_Y}")
+print(f"H(X, Y): {H_XY}")
+print(f"H(X|Y): {H_X_given_Y}")
+print(f"H(Y|X): {H_Y_given_X}")
+print(f"I(X; Y): {I_XY}")
+  
